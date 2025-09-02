@@ -11,12 +11,30 @@ const App = () => {
     }
   };
 
-  const handleApiKeyChange = (event) => {
+  const handleApiKeyChange = async (event) => {
     setApiKey(event.target.value);
   };
 
-  const handleApiKeySubmit = () => {
-    console.log("Submitting API Key:", apiKey);
+  const handleApiKeySubmit = async () => {
+    if (!apiKey.trim()) return alert("Please provide an API key"); // To ensure no whitespace inputs, and no input
+
+    try {
+      const response = await fetch(
+        "http://localhost:5182/api/ApiKey/PostApiKeys",
+        {
+          method: "Post",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ key: apiKey }),
+        }
+      );
+      const result = await response.json();
+      alert(
+        response.ok ? "API key saved succesfully!" : `Error: ${result.message}`
+      );
+      if (response.ok) setApiKey("");
+    } catch {
+      alert("Network error occurred. Please try again");
+    }
   };
 
   return (

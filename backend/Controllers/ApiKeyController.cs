@@ -14,7 +14,7 @@ namespace backend.Controllers
             _context = context;
         }
 
-        [HttpPost]
+        [HttpPost("PostApiKeys")]
         public async Task<IActionResult> SaveApiKey([FromBody] ApiKey request)
         {
             var apiKey = new ApiKey
@@ -25,7 +25,7 @@ namespace backend.Controllers
             await _context.SaveChangesAsync();
             return Ok(new { message = "API key saved successfully.", id = apiKey.Id });
         }
-        [HttpGet]
+        [HttpGet("GetApiKeys")]
         public IActionResult GetApiKeys()
         {
             var apiKey = _context.ApiKeys.FirstOrDefault();
