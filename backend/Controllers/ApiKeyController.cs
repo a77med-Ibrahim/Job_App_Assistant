@@ -15,17 +15,6 @@ namespace backend.Controllers
             _context = context;
         }
 
-        // [HttpPost("PostApiKeys")]
-        public async Task<IActionResult> SaveApiKey([FromBody] ApiKey request)
-        {
-            var apiKey = new ApiKey
-            {
-                Key = request.Key
-            };
-            _context.ApiKeys.Add(apiKey);
-            await _context.SaveChangesAsync();
-            return Ok(new { message = "API key saved successfully.", id = apiKey.Id });
-        }
         [HttpGet("GetApiKeys")]
         public IActionResult GetApiKeys()
         {
@@ -37,20 +26,21 @@ namespace backend.Controllers
             return Ok(new { key = apiKey.Key, id = apiKey.Id });
         }
 
-        [HttpPut("UpdateApiKeys")]
+        [HttpPost("UpseartApiKey")]
         public async Task<IActionResult> UpdateApiKeys([FromBody] ApiKey request)
         {
             var existingApiKey = _context.ApiKeys.FirstOrDefault();
-            if (existingApiKey == null) {
-            var apiKey = new ApiKey {Key = request.Key};
-            _context.ApiKeys.Add(apiKey);
-            await _context.SaveChangesAsync();
-            return Ok(new { message = "API key saved successfully.", id = apiKey.Id });
+            if (existingApiKey == null)
+            {
+                var apiKey = new ApiKey { Key = request.Key };
+                _context.ApiKeys.Add(apiKey);
+                await _context.SaveChangesAsync();
+                return Ok(new { message = "API key saved successfully.", id = apiKey.Id });
             }
-            _context.ApiKeys.Update();
-            return Ok("Updated succesfully");
+            existingApiKey.Key = request.Key;
+            await _context.SaveChangesAsync();
+            return Ok(new { message = "API key updated successfully.", id = existingApiKey.Id });
         }
         
-
     }
 }

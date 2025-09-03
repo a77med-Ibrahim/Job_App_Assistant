@@ -20,7 +20,7 @@ const App = () => {
 
     try {
       const response = await fetch(
-        "http://localhost:5182/api/ApiKey/UpdateApiKeys",
+        "http://localhost:5182/api/ApiKey/UpseartApiKey",
         {
           method: "Post",
           headers: { "Content-Type": "application/json" },
