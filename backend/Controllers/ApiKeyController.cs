@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using backend.Data;
 using backend.Models;
+using System.Threading.Tasks;
 
 namespace backend.Controllers
 {
@@ -14,7 +15,7 @@ namespace backend.Controllers
             _context = context;
         }
 
-        [HttpPost("PostApiKeys")]
+        // [HttpPost("PostApiKeys")]
         public async Task<IActionResult> SaveApiKey([FromBody] ApiKey request)
         {
             var apiKey = new ApiKey
@@ -34,6 +35,20 @@ namespace backend.Controllers
                 return NotFound(new { message = "No API keys found." });
             }
             return Ok(new { key = apiKey.Key, id = apiKey.Id });
+        }
+
+        [HttpPut("UpdateApiKeys")]
+        public async Task<IActionResult> UpdateApiKeys([FromBody] ApiKey request)
+        {
+            var existingApiKey = _context.ApiKeys.FirstOrDefault();
+            if (existingApiKey == null) {
+            var apiKey = new ApiKey {Key = request.Key};
+            _context.ApiKeys.Add(apiKey);
+            await _context.SaveChangesAsync();
+            return Ok(new { message = "API key saved successfully.", id = apiKey.Id });
+            }
+            _context.ApiKeys.Update();
+            return Ok("Updated succesfully");
         }
         
 
