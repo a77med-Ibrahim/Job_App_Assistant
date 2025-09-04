@@ -26,10 +26,11 @@ namespace backend.Controllers
             return Ok(new { key = apiKey.Key, id = apiKey.Id });
         }
 
-        [HttpPost("UpseartApiKey")]
+        [HttpPost("UpsertApiKey")]
         public async Task<IActionResult> UpdateApiKeys([FromBody] ApiKey request)
         {
             var existingApiKey = _context.ApiKeys.FirstOrDefault();
+            Console.WriteLine(existingApiKey);
             if (existingApiKey == null)
             {
                 var apiKey = new ApiKey { Key = request.Key };

@@ -11,6 +11,8 @@ namespace backend.Data
         public DbSet<JobMatch> JobMatches { get; set; }
         public DbSet<CoverLetter> CoverLetters { get; set; }
         public DbSet<ApiKey> ApiKeys { get; set; }
+        public DbSet<Resume> Resumes { get; set; 
+        }
 
     }
 }
