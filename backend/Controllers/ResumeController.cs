@@ -3,6 +3,8 @@ using backend.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection.Metadata.Ecma335;
 using backend.Models;
+using System.Net;
+using System.ComponentModel;
 
 namespace backend.Controllers
 {
@@ -44,7 +46,32 @@ namespace backend.Controllers
                     EmbeddingJson = string.Empty,
                     Record = record
                 };
+            _context.Records.Add(record);
+            _context.Resumes.Add(resume);
             }
+           
+            await _context.SaveChangesAsync();
+            return Ok(new { Message = "Resume uploaded successfully" });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetResume()
+        {
+            var resume = await _context.Resumes.Include(r => r.Record).FirstOrDefaultAsync();
+
+            if (resume == null) return NotFound(new { Message = "No resume found" });
+
+            return Ok(new
+            {
+                Id = resume.Id,
+                Text = resume.Text,
+                HasEmbeddings = !string.IsNullOrEmpty(resume.EmbeddingJson),
+                UploadDate = resume.Record.Date,
+                Description = resume.Record.Description
+
+            });
+            
+        
         }
         
     }
