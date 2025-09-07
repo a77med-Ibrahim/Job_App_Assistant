@@ -5,6 +5,8 @@ using System.Reflection.Metadata.Ecma335;
 using backend.Models;
 using System.Net;
 using System.ComponentModel;
+using System.Net.Http.Headers;
+using System.Runtime.CompilerServices;
 
 namespace backend.Controllers
 {
@@ -13,16 +15,18 @@ namespace backend.Controllers
     public class ResumeController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly HttpClient _httpClient;
 
-        public ResumeController(AppDbContext context)
+        public ResumeController(AppDbContext context, HttpClient httpClient)
         {
             _context = context;
+            _httpClient = httpClient;
         }
 
         [HttpPost("UpsertResume")]
         public async Task<IActionResult> UpSeartResume([FromBody] string resumeText)
         {
-
+            Resume targetResume;
             var existingResume = await _context.Resumes.Include(r => r.Record).FirstOrDefaultAsync();
 
             if (existingResume != null) // If there is an existing record in the Resume table
@@ -31,6 +35,7 @@ namespace backend.Controllers
                 existingResume.EmbeddingJson = string.Empty; // Embeddings will be done in the background, that's why it's initally empty
                 existingResume.Record.Date = DateTime.UtcNow;
                 existingResume.Record.Description = "Resume";
+                targetResume = existingResume; // TODO: Carry on from here
             }
             else
             {
@@ -46,8 +51,8 @@ namespace backend.Controllers
                     EmbeddingJson = string.Empty,
                     Record = record
                 };
-            _context.Records.Add(record);
-            _context.Resumes.Add(resume);
+                _context.Records.Add(record);
+                _context.Resumes.Add(resume);
             }
            
             await _context.SaveChangesAsync();
