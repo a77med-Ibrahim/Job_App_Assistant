@@ -53,8 +53,9 @@ namespace backend.Controllers
                 };
                 _context.Records.Add(record);
                 _context.Resumes.Add(resume);
+                targetResume = resume;
             }
-           
+
             await _context.SaveChangesAsync();
             return Ok(new { Message = "Resume uploaded successfully" });
         }
@@ -75,8 +76,19 @@ namespace backend.Controllers
                 Description = resume.Record.Description
 
             });
+        }
+
+        private async Task GenerateEmbeddingsAsync(int resumeId)
+        {
+            try
+            {
+                var resume = await _context.Resumes.Find(r => resumeId).FirstOrDefaultAsync();
+            }
+            catch
+            {
+                
+            }
             
-        
         }
         
     }
