@@ -11,28 +11,36 @@ namespace backend.Controllers
     [Route("api/[controller]")]
     public class ResumeController : ControllerBase
     {
+        private readonly IServiceScopeFactory _scopeFactory;
         private readonly AppDbContext _context;
-        private readonly HttpClient _httpClient;
+        private readonly IHttpClientFactory _httpClientFactory;
 
-        public ResumeController(AppDbContext context, HttpClient httpClient)
+        public ResumeController(AppDbContext context, IHttpClientFactory httpClientFactory, IServiceScopeFactory scopeFactory)
         {
             _context = context;
-            _httpClient = httpClient;
+            _httpClientFactory = httpClientFactory;
+            _scopeFactory = scopeFactory;
         }
 
+
         [HttpPost("UpsertResume")]
-        public async Task<IActionResult> UpSeartResume([FromBody] string resumeText)
+        public async Task<IActionResult> UpsertResume([FromBody] string resumeText)
         {
+            if (string.IsNullOrWhiteSpace(resumeText))
+            {
+                return BadRequest(new { Message = "Resume text cannot be empty" });
+            }
+
             Resume targetResume;
             var existingResume = await _context.Resumes.Include(r => r.Record).FirstOrDefaultAsync();
 
             if (existingResume != null) // If there is an existing record in the Resume table
             {
                 existingResume.Text = resumeText;
-                existingResume.EmbeddingJson = string.Empty; // Embeddings will be done in the background, that's why it's initally empty
+                existingResume.EmbeddingJson = string.Empty; // Embeddings will be done in the background, that's why it's initially empty
                 existingResume.Record.Date = DateTime.UtcNow;
                 existingResume.Record.Description = "Resume";
-                targetResume = existingResume; // TODO: Carry on from here
+                targetResume = existingResume;
             }
             else
             {
@@ -54,7 +62,10 @@ namespace backend.Controllers
             }
 
             await _context.SaveChangesAsync();
-            await GenerateEmbeddingsAsync();
+            
+            // Start background task for embeddings
+            _ = Task.Run(async () => await GenerateEmbeddingsAsync(targetResume.Id));
+            
             return Ok(new { Message = "Resume uploaded successfully" });
         }
 
@@ -72,65 +83,76 @@ namespace backend.Controllers
                 HasEmbeddings = !string.IsNullOrEmpty(resume.EmbeddingJson),
                 UploadDate = resume.Record.Date,
                 Description = resume.Record.Description
-
             });
         }
 
-        private async Task GenerateEmbeddingsAsync()
+        private async Task GenerateEmbeddingsAsync(int resumeId)
         {
-            try
+    try
+    {
+        using var scope = _scopeFactory.CreateScope();
+        var scopedContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        var resume = await scopedContext.Resumes.FirstOrDefaultAsync(r => r.Id == resumeId);
+        if (resume == null) return;
+
+        var apiKey = await scopedContext.ApiKeys.Select(k => k.Key).FirstOrDefaultAsync();
+        if (string.IsNullOrEmpty(apiKey))
+        {
+            Console.WriteLine("No API key found");
+            return;
+        }
+
+        var requestBody = new
+        {
+            model = "gemini-embedding-001",
+            content = new
             {
-                var resume = await _context.Resumes.FirstOrDefaultAsync(r => r.Id == 1);
-
-                if (resume != null)
+                parts = new[]
                 {
-                    var apiKey = await _context.ApiKeys.Select(k => k.Key).FirstOrDefaultAsync();
-                    if (apiKey != null)
-                    {
-                        // This part is used to make the text as Gemini expects
-                        var requestBody = new
-                        {
-                            model = "models/text-embedding-001",
-                            content = new
-                            {
-                                parts = new[]{
-                                    new {text = resume.Text}
-                                }
-                            }
-                        };
-                        // This part is to convert the above part to json
-                        var json = JsonSerializer.Serialize(requestBody);
-                        var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-                        // Http request to gemini
-                        var response = await _httpClient.PostAsync($"https://generativelanguage.googleapis.com/v1beta/models/text-embedding-001:embedContent?key={apiKey}", content);
-
-                        if (response.IsSuccessStatusCode)
-                        {
-                            var responseBody = await response.Content.ReadAsStringAsync();
-
-                            using var document = JsonDocument.Parse(responseBody);
-                            var embeddingArray = document.RootElement.GetProperty("embedding").GetProperty("values").EnumerateArray()
-                            .Select(x => x.GetSingle()).ToArray();
-
-                            resume.EmbeddingJson = JsonSerializer.Serialize(embeddingArray);
-                            await _context.SaveChangesAsync();
-                        }
-                        else
-                        {
-                            Console.WriteLine($"Gemini API error: {response.StatusCode}");
-                        }
-                              
-
-                    }
+                    new { text = resume.Text }
                 }
             }
-            catch (Exception e)
-            {
-                Console.WriteLine($"Error generating embeddings: {e.Message}");
-            }
-            
+        };
+
+        var json = JsonSerializer.Serialize(requestBody);
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+        using var httpClient = _httpClientFactory.CreateClient();
+        var response = await httpClient.PostAsync(
+            $"https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent?key={apiKey}", 
+            content
+        );
+
+        if (!response.IsSuccessStatusCode)
+        {
+            Console.WriteLine($"Gemini API error: {response.StatusCode}");
+            var errorBody = await response.Content.ReadAsStringAsync();
+            Console.WriteLine("Error body: " + errorBody);
+            return;
         }
-        
+
+        var responseBody = await response.Content.ReadAsStringAsync();
+        using var document = JsonDocument.Parse(responseBody);
+
+        // Parse embeddings
+        var embeddingArray = document.RootElement
+            .GetProperty("embedding")
+            .GetProperty("values")
+            .EnumerateArray()
+            .Select(x => x.GetDouble())
+            .ToArray();
+
+        resume.EmbeddingJson = JsonSerializer.Serialize(embeddingArray);
+        await scopedContext.SaveChangesAsync();
+
+        Console.WriteLine("Embeddings generated successfully!");
+    }
+    catch (Exception e)
+    {
+        Console.WriteLine($"Error generating embeddings: {e}");
+    }
+}
+
     }
 }

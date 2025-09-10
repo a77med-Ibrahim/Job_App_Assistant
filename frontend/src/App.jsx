@@ -1,146 +1,149 @@
-// import React, { useState } from "react";
-// import "./App.css";
-
-// const App = () => {
-//   const [resumeFileName, setResumeFileName] = useState("No file uploaded");
-//   const [apiKey, setApiKey] = useState("");
-
-//   const handleResumeUpload = (event) => {
-//     if (event.target.files.length > 0) {
-//       setResumeFileName(event.target.files[0].name);
-//     }
-//   };
-
-//   const handleApiKeyChange = async (event) => {
-//     setApiKey(event.target.value);
-//   };
-
-//   const handleApiKeySubmit = async () => {
-//     if (!apiKey.trim()) return alert("Please provide an API key"); // To ensure no whitespace inputs, and no input
-
-//     try {
-//       const response = await fetch(
-//         "http://localhost:5182/api/ApiKey/UpsertApiKey",
-//         {
-//           method: "Post",
-//           headers: { "Content-Type": "application/json" },
-//           body: JSON.stringify({ key: apiKey }),
-//         }
-//       );
-//       const result = await response.json();
-//       alert(
-//         response.ok ? "API key saved succesfully!" : `Error: ${result.message}`
-//       );
-//       if (response.ok) setApiKey("");
-//     } catch {
-//       alert("Network error occurred. Please try again");
-//     }
-//   };
-
-//   return (
-//     <>
-//       <div className="app-container">
-//         <div className="main-card">
-//           <h1 className="title">
-//             Hello, this is <span className="title-highlight">Abssi</span>
-//           </h1>
-//           <p className="subtitle">Your assistant to find a job</p>
-
-//           <div className="button-container">
-//             <button className="button-base button-grey">Cover letter</button>
-//             <button className="button-base button-grey">Job matching</button>
-//           </div>
-
-//           <p className="file-name">{resumeFileName}</p>
-
-//           <label className="upload-label button-base button-purple">
-//             <input
-//               type="file"
-//               onChange={handleResumeUpload}
-//               className="input-file"
-//             />
-//             Upload your Resume
-//           </label>
-
-//           <p className="api-key-text">Add your Gemini API key</p>
-//           <div className="api-key-input-container">
-//             <input
-//               type="password"
-//               value={apiKey}
-//               onChange={handleApiKeyChange}
-//               placeholder="Enter API key"
-//               className="api-key-input"
-//             />
-//             <button
-//               onClick={handleApiKeySubmit}
-//               className="button-base button-purple"
-//             >
-//               Submit
-//             </button>
-//           </div>
-//         </div>
-//       </div>
-//     </>
-//   );
-// };
-
-// export default App;
-
 import React, { useState } from "react";
 import "./App.css";
+import Tesseract from "tesseract.js";
+
+import { GlobalWorkerOptions, getDocument } from "pdfjs-dist";
+import pdfWorker from "pdfjs-dist/build/pdf.worker?url";
 
 const App = () => {
   const [resumeFileName, setResumeFileName] = useState("No file uploaded");
   const [apiKey, setApiKey] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
+
+  // To handle screenshotted resumes
+  const extractTextFromPDF = async (file) => {
+    try {
+      GlobalWorkerOptions.workerSrc = pdfWorker;
+
+      const arrayBuffer = await file.arrayBuffer();
+      const pdf = await getDocument({ data: arrayBuffer }).promise;
+      let fullText = "";
+
+      for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+        const page = await pdf.getPage(pageNum);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items
+          .map((item) => item.str || "")
+          .join(" ")
+          .replace(/\s+/g, " ")
+          .trim();
+
+        if (pageText.length > 0) {
+          fullText += pageText + "\n";
+        } else {
+          // OCR fallback (rare if PDF is from Word)
+          const canvas = document.createElement("canvas");
+          const viewport = page.getViewport({ scale: 2 });
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+          const ctx = canvas.getContext("2d");
+
+          await page.render({ canvasContext: ctx, viewport }).promise;
+          const ocrResult = await Tesseract.recognize(canvas, "eng");
+          fullText += ocrResult.data.text + "\n";
+        }
+      }
+
+      return fullText.trim();
+    } catch (error) {
+      console.error("Error extracting PDF text:", error);
+      throw new Error("Failed to extract text from PDF.");
+    }
+  };
 
   const handleResumeUpload = async (event) => {
     if (event.target.files.length > 0) {
       const file = event.target.files[0];
       setResumeFileName(file.name);
-
-      const formData = new FormData();
-      formData.append("resume", file);
+      setIsUploading(true);
 
       try {
-        const response = await fetch("http://localhost:5182/api/Resume", {
-          method: "POST",
-          body: formData,
-        });
+        let fileText;
+
+        // Check file type and extract text accordingly
+        if (
+          file.type === "application/pdf" ||
+          file.name.toLowerCase().endsWith(".pdf")
+        ) {
+          console.log("Processing PDF file...");
+          fileText = await extractTextFromPDF(file);
+        } else if (
+          file.type === "text/plain" ||
+          file.name.toLowerCase().endsWith(".txt")
+        ) {
+          fileText = await file.text();
+        } else {
+          alert("Unsupported file type. Please upload a PDF or TXT file.");
+          setIsUploading(false);
+          return;
+        }
+
+        // Check if we got any text
+        if (!fileText || fileText.trim().length === 0) {
+          alert(
+            "No text could be extracted from the file. Please make sure it contains readable text."
+          );
+          setIsUploading(false);
+          return;
+        }
+
+        console.log(
+          "Extracted text preview:",
+          fileText.substring(0, 200) + "..."
+        );
+
+        const response = await fetch(
+          "http://localhost:5182/api/Resume/UpsertResume",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(fileText),
+          }
+        );
 
         if (response.ok) {
           alert("Resume uploaded successfully!");
         } else {
           const result = await response.json();
-          alert(`Error: ${result.message}`);
+          alert(`Error: ${result.message || result.Message}`);
         }
       } catch (error) {
-        alert("Network error while uploading resume");
+        console.error("Error uploading resume:", error);
+        alert(`Error processing file: ${error.message}`);
+      } finally {
+        setIsUploading(false);
       }
     }
   };
 
-  const handleApiKeyChange = async (event) => {
+  const handleApiKeyChange = (event) => {
     setApiKey(event.target.value);
   };
 
   const handleApiKeySubmit = async () => {
-    if (!apiKey.trim()) return alert("Please provide an API key"); // To ensure no whitespace inputs, and no input
+    if (!apiKey.trim()) return alert("Please provide an API key");
 
     try {
       const response = await fetch(
         "http://localhost:5182/api/ApiKey/UpsertApiKey",
         {
-          method: "Post",
+          method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ key: apiKey }),
         }
       );
+
       const result = await response.json();
       alert(
-        response.ok ? "API key saved succesfully!" : `Error: ${result.message}`
+        response.ok
+          ? "API key saved successfully!"
+          : `Error: ${result.message || result.Message}`
       );
       if (response.ok) setApiKey("");
-    } catch {
+    } catch (error) {
+      console.error("Error saving API key:", error);
       alert("Network error occurred. Please try again");
     }
   };
@@ -166,8 +169,10 @@ const App = () => {
               type="file"
               onChange={handleResumeUpload}
               className="input-file"
+              accept=".pdf,.txt"
+              disabled={isUploading}
             />
-            Upload your Resume
+            {isUploading ? "Processing..." : "Upload your Resume"}
           </label>
 
           <p className="api-key-text">Add your Gemini API key</p>

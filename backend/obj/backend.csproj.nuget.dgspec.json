@@ -59,6 +59,14 @@
               "suppressParent": "All",
               "target": "Package",
               "version": "[9.0.8, )"
+            },
+            "PdfPig": {
+              "target": "Package",
+              "version": "[0.1.11, )"
+            },
+            "itext7": {
+              "target": "Package",
+              "version": "[9.3.0, )"
             }
           },
           "imports": [
