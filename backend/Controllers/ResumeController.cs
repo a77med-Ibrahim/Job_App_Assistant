@@ -1,12 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using backend.Data;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection.Metadata.Ecma335;
 using backend.Models;
-using System.Net;
-using System.ComponentModel;
-using System.Net.Http.Headers;
-using System.Runtime.CompilerServices;
+using System.Text.Json;
+using System.Text;
 
 namespace backend.Controllers
 {
@@ -57,6 +54,7 @@ namespace backend.Controllers
             }
 
             await _context.SaveChangesAsync();
+            await GenerateEmbeddingsAsync();
             return Ok(new { Message = "Resume uploaded successfully" });
         }
 
@@ -78,15 +76,58 @@ namespace backend.Controllers
             });
         }
 
-        private async Task GenerateEmbeddingsAsync(int resumeId)
+        private async Task GenerateEmbeddingsAsync()
         {
             try
             {
-                var resume = await _context.Resumes.Find(r => resumeId).FirstOrDefaultAsync();
+                var resume = await _context.Resumes.FirstOrDefaultAsync(r => r.Id == 1);
+
+                if (resume != null)
+                {
+                    var apiKey = await _context.ApiKeys.Select(k => k.Key).FirstOrDefaultAsync();
+                    if (apiKey != null)
+                    {
+                        // This part is used to make the text as Gemini expects
+                        var requestBody = new
+                        {
+                            model = "models/text-embedding-001",
+                            content = new
+                            {
+                                parts = new[]{
+                                    new {text = resume.Text}
+                                }
+                            }
+                        };
+                        // This part is to convert the above part to json
+                        var json = JsonSerializer.Serialize(requestBody);
+                        var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                        // Http request to gemini
+                        var response = await _httpClient.PostAsync($"https://generativelanguage.googleapis.com/v1beta/models/text-embedding-001:embedContent?key={apiKey}", content);
+
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var responseBody = await response.Content.ReadAsStringAsync();
+
+                            using var document = JsonDocument.Parse(responseBody);
+                            var embeddingArray = document.RootElement.GetProperty("embedding").GetProperty("values").EnumerateArray()
+                            .Select(x => x.GetSingle()).ToArray();
+
+                            resume.EmbeddingJson = JsonSerializer.Serialize(embeddingArray);
+                            await _context.SaveChangesAsync();
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Gemini API error: {response.StatusCode}");
+                        }
+                              
+
+                    }
+                }
             }
-            catch
+            catch (Exception e)
             {
-                
+                Console.WriteLine($"Error generating embeddings: {e.Message}");
             }
             
         }
