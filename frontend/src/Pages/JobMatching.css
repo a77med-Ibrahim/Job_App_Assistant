@@ -1,6 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap");
 
-/* --- Base & Layout --- */
 .app-container {
   background-color: #1e202a;
   min-height: 100vh;
@@ -19,7 +18,7 @@
   border-radius: 1rem;
   box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25), 0 0 15px 0 rgb(0 0 0 / 0.3);
   width: 100%;
-  max-width: 56rem; /* 896px */
+  max-width: 56rem;
   transition: all 500ms ease;
   min-height: 550px;
 }
@@ -47,10 +46,9 @@
   margin-top: 2rem;
 }
 
-/* --- Typography --- */
 .title {
-  font-size: 2.25rem; /* 36px */
-  line-height: 2.5rem; /* 40px */
+  font-size: 2.25rem;
+  line-height: 2.5rem;
   font-weight: 900;
   text-align: center;
   margin-bottom: 0.5rem;
@@ -67,18 +65,13 @@
   font-weight: 600;
   font-size: 1.125rem;
   color: #cbd5e1;
-  margin-bottom: -1rem; /* Adjusted for gap */
+  margin-bottom: -1rem;
 }
 .input-label-sm {
   text-align: left;
   color: #94a3b8;
-  margin-bottom: -1rem; /* Adjusted for gap */
+  margin-bottom: -1rem;
   font-size: 0.875rem;
-}
-
-/* --- Forms & Inputs --- */
-.hidden-file-input {
-  display: none;
 }
 
 .upload-container {
@@ -91,25 +84,6 @@
   color: #94a3b8;
   margin-bottom: 0.75rem;
 }
-.file-display {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  margin-bottom: 0.75rem;
-}
-.file-icon-success {
-  color: #4ade80;
-}
-.file-name {
-  color: #4ade80;
-  font-family: monospace;
-  font-size: 0.875rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .textarea-input,
 .text-input {
   background-color: #334155;
@@ -121,7 +95,7 @@
   color: #e5e7eb;
 }
 .textarea-input {
-  height: 12rem; /* 192px */
+  height: 12rem;
   resize: none;
 }
 .textarea-input:focus,
@@ -130,14 +104,6 @@
   box-shadow: 0 0 0 2px #a855f7;
   border-color: #a855f7;
 }
-
-.api-key-form {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-/* --- Buttons --- */
 .button {
   font-weight: 700;
   border-radius: 0.5rem;
@@ -168,7 +134,7 @@
   font-size: 1.125rem;
   padding: 0.75rem 0;
   width: 100%;
-  max-width: 20rem; /* 320px */
+  max-width: 20rem;
 }
 .button-accent:hover {
   background-color: #7e22ce;
@@ -178,14 +144,14 @@
   cursor: not-allowed;
 }
 
-/* --- Score & Spinner --- */
 .score-display-area {
-  height: 12rem; /* 192px */
+  height: 12rem;
   width: 12rem;
   display: flex;
   justify-content: center;
   align-items: center;
 }
+
 .score-circle-wrapper,
 .spinner-wrapper {
   position: relative;
@@ -195,32 +161,37 @@
   align-items: center;
   justify-content: center;
 }
-.score-circle-svg {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  transform: rotate(-90deg);
-}
+
 .score-circle-bg {
   stroke: #475569;
 }
+
 .score-circle-fg {
   stroke: #a855f7;
   transition: stroke-dashoffset 0.3s ease-out;
 }
+
 .score-text-container {
-  position: relative;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   text-align: center;
 }
+
 .score-percentage {
   font-size: 3rem;
   font-weight: 700;
   color: white;
+  line-height: 1;
 }
+
 .score-label {
   font-size: 0.875rem;
   color: #94a3b8;
+  margin-top: 0.25rem;
 }
+
 .spinner-track {
   position: absolute;
   width: 100%;
@@ -228,6 +199,7 @@
   border: 4px solid #475569;
   border-radius: 9999px;
 }
+
 .spinner-head {
   position: absolute;
   width: 100%;
@@ -237,11 +209,11 @@
   border-radius: 9999px;
   animation: spin 1s linear infinite;
 }
+
 .spinner-text {
   color: #cbd5e1;
 }
 
-/* --- Animations --- */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -264,10 +236,9 @@
   }
 }
 
-/* --- Responsive Design --- */
 @media (min-width: 768px) {
   .title {
-    font-size: 3rem; /* 48px */
+    font-size: 3rem;
     line-height: 1;
   }
   .content-grid {
@@ -275,9 +246,6 @@
   }
   .output-container {
     margin-top: 0;
-  }
-  .api-key-form {
-    flex-direction: row;
   }
   .text-input {
     flex-grow: 1;

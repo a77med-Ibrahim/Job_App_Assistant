@@ -1,19 +1,14 @@
 import React, { useState, useRef, useEffect } from "react";
+import "./JobMatching.css";
 
-// Main App Component
 export default function App() {
-  // State for user inputs and results
   const [apiKey, setApiKey] = useState("");
   const [tempApiKey, setTempApiKey] = useState("");
   const [resumeFile, setResumeFile] = useState(null);
   const [jobDescription, setJobDescription] = useState("");
   const [matchingScore, setMatchingScore] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-
-  // Ref for the hidden file input
   const fileInputRef = useRef(null);
-
-  // --- Event Handlers ---
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -22,15 +17,8 @@ export default function App() {
     }
   };
 
-  const handleApiKeySubmit = (e) => {
-    e.preventDefault();
-    setApiKey(tempApiKey);
-  };
-
-  // Simulates an API call to calculate the job match score
   const handleCalculateScore = () => {
     if (!jobDescription.trim()) {
-      // Using a custom alert modal instead of window.alert
       alert("Please paste a job description.");
       return;
     }
@@ -41,8 +29,6 @@ export default function App() {
 
     setIsLoading(true);
     setMatchingScore(null);
-
-    // Simulate network delay and calculation
     setTimeout(() => {
       const randomScore = Math.floor(Math.random() * (99 - 75 + 1)) + 75;
       setMatchingScore(randomScore);
@@ -50,9 +36,6 @@ export default function App() {
     }, 2500);
   };
 
-  // --- Helper Components / Render Functions ---
-
-  // Animated circle for displaying the score
   const ScoreCircle = ({ score }) => {
     const [displayScore, setDisplayScore] = useState(0);
     const circumference = 2 * Math.PI * 55; // 55 is the radius
@@ -118,90 +101,25 @@ export default function App() {
 
   return (
     <div className="app-container">
-      {/* Main container card */}
       <div className="main-card">
         <div className="animate-fade-in">
           <h1 className="title">
             Job <span className="title-highlight">Matching</span>
           </h1>
           <p className="subtitle">
-            Upload your resume and a job description to see your match score.
+            Upload your Job description to see your match score.
           </p>
 
           <div className="content-grid">
-            {/* Left side: Inputs */}
-            <div className="inputs-container">
-              {/* Resume Upload */}
-              <div className="upload-container">
-                {resumeFile ? (
-                  <div className="file-display">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="file-icon-success"
-                    >
-                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                      <polyline points="22 4 12 14.01 9 11.01" />
-                    </svg>
-                    <p className="file-name">{resumeFile.name}</p>
-                  </div>
-                ) : (
-                  <p className="upload-prompt">Upload your Resume</p>
-                )}
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleFileChange}
-                  accept=".pdf,.doc,.docx"
-                  className="hidden-file-input"
-                />
-                <button
-                  onClick={() => fileInputRef.current.click()}
-                  className="button button-secondary"
-                >
-                  {resumeFile ? "Change Resume" : "Select File"}
-                </button>
-              </div>
-
-              {/* Job Description */}
-              <div className="input-field">
-                <h3 className="input-label">Paste Job Description Here</h3>
-                <textarea
-                  value={jobDescription}
-                  onChange={(e) => setJobDescription(e.target.value)}
-                  placeholder="Paste the full job description here..."
-                  className="textarea-input"
-                ></textarea>
-              </div>
-
-              {/* API Key */}
-              <div className="input-field">
-                <p className="input-label-sm">
-                  {apiKey ? `API Key Saved!` : `Add your Gemini API key`}
-                </p>
-                <form onSubmit={handleApiKeySubmit} className="api-key-form">
-                  <input
-                    type="password"
-                    value={tempApiKey}
-                    onChange={(e) => setTempApiKey(e.target.value)}
-                    placeholder="Enter API Key"
-                    className="text-input"
-                  />
-                  <button type="submit" className="button button-tertiary">
-                    Submit
-                  </button>
-                </form>
-              </div>
+            <div className="input-field">
+              <h3 className="input-label">Paste Job Description Here</h3>
+              <textarea
+                value={jobDescription}
+                onChange={(e) => setJobDescription(e.target.value)}
+                placeholder="Paste the full job description here..."
+                className="textarea-input"
+              ></textarea>
             </div>
-
-            {/* Right side: Output & Action */}
             <div className="output-container">
               <div className="score-display-area">
                 {isLoading ? (
@@ -221,8 +139,6 @@ export default function App() {
           </div>
         </div>
       </div>
-
-      <CustomStyles />
     </div>
   );
 }

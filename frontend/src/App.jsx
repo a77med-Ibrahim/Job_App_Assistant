@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
 import Tesseract from "tesseract.js";
-
+import { Routes, Route, Link } from "react-router-dom";
+import JobMatching from "./Pages/JobMatching";
 import { GlobalWorkerOptions, getDocument } from "pdfjs-dist";
 import pdfWorker from "pdfjs-dist/build/pdf.worker?url";
 
@@ -186,56 +187,76 @@ const App = () => {
   };
 
   return (
-    <>
-      <div className="app-container">
-        <div className="main-card">
-          <h1 className="title">
-            Hello, this is <span className="title-highlight">Abssi</span>
-          </h1>
-          <p className="subtitle">Your assistant to find a job</p>
+    <Routes>
+      {/* Main Page */}
+      <Route
+        path="/"
+        element={
+          <>
+            <div className="app-container-main">
+              <div className="main-card-main">
+                <h1 className="title">
+                  Hello, this is <span className="title-highlight">Abssi</span>
+                </h1>
+                <p className="subtitle">Your assistant to find a job</p>
 
-          <div className="button-container">
-            <button className="button-base button-grey">Cover letter</button>
-            <button className="button-base button-grey">Job matching</button>
-          </div>
+                <div className="button-container">
+                  <button className="button-base button-grey">
+                    Cover letter
+                  </button>
+                  <Link
+                    to="/JobMatching"
+                    className="button-base button-grey"
+                    style={{ textDecoration: "none" }}
+                  >
+                    Job matching
+                  </Link>
+                </div>
 
-          {/* <p className="file-name">{resumeFileName}</p> */}
-          <p className="resume-text">
-            {isResumeSaved ? "Resume uploaded ✅" : "No resume uploaded yet"}
-          </p>
+                <p className="resume-text">
+                  {isResumeSaved
+                    ? "Resume uploaded ✅"
+                    : "No resume uploaded yet"}
+                </p>
 
-          <label className="upload-label button-base button-purple">
-            <input
-              type="file"
-              onChange={handleResumeUpload}
-              className="input-file"
-              accept=".pdf,.txt"
-              disabled={isUploading}
-            />
-            {isUploading ? "Processing..." : "Upload your Resume"}
-          </label>
+                <label className="upload-label button-base button-purple">
+                  <input
+                    type="file"
+                    onChange={handleResumeUpload}
+                    className="input-file"
+                    accept=".pdf,.txt"
+                    disabled={isUploading}
+                  />
+                  {isUploading ? "Processing..." : "Upload your Resume"}
+                </label>
 
-          <p className="api-key-text">
-            {isApiKeySaved ? "API key added ✅" : "Add your Gemini API key"}
-          </p>
-          <div className="api-key-input-container">
-            <input
-              type="password"
-              value={apiKey}
-              onChange={handleApiKeyChange}
-              placeholder="Enter API key"
-              className="api-key-input"
-            />
-            <button
-              onClick={handleApiKeySubmit}
-              className="button-base button-purple"
-            >
-              Submit
-            </button>
-          </div>
-        </div>
-      </div>
-    </>
+                <p className="api-key-text">
+                  {isApiKeySaved
+                    ? "API key added ✅"
+                    : "Add your Gemini API key"}
+                </p>
+                <div className="api-key-input-container">
+                  <input
+                    type="password"
+                    value={apiKey}
+                    onChange={handleApiKeyChange}
+                    placeholder="Enter API key"
+                    className="api-key-input"
+                  />
+                  <button
+                    onClick={handleApiKeySubmit}
+                    className="button-base button-purple"
+                  >
+                    Submit
+                  </button>
+                </div>
+              </div>
+            </div>
+          </>
+        }
+      />
+      <Route path="/JobMatching" element={<JobMatching />} />
+    </Routes>
   );
 };
 

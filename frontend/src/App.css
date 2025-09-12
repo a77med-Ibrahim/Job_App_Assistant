@@ -6,7 +6,7 @@ body {
   margin: 0;
   padding: 0;
 }
-.app-container {
+.app-container-main {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -18,7 +18,7 @@ body {
   font-family: "Inter", sans-serif;
 }
 
-.main-card {
+.main-card-main {
   width: 100%;
   max-width: 48rem;
   background-color: #334155;
