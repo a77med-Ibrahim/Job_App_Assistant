@@ -62,10 +62,10 @@ namespace backend.Controllers
             }
 
             await _context.SaveChangesAsync();
-            
+
             // Start background task for embeddings
             _ = Task.Run(async () => await GenerateEmbeddingsAsync(targetResume.Id));
-            
+
             return Ok(new { Message = "Resume uploaded successfully" });
         }
 
@@ -88,71 +88,79 @@ namespace backend.Controllers
 
         private async Task GenerateEmbeddingsAsync(int resumeId)
         {
-    try
-    {
-        using var scope = _scopeFactory.CreateScope();
-        var scopedContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
-        var resume = await scopedContext.Resumes.FirstOrDefaultAsync(r => r.Id == resumeId);
-        if (resume == null) return;
-
-        var apiKey = await scopedContext.ApiKeys.Select(k => k.Key).FirstOrDefaultAsync();
-        if (string.IsNullOrEmpty(apiKey))
-        {
-            Console.WriteLine("No API key found");
-            return;
-        }
-
-        var requestBody = new
-        {
-            model = "gemini-embedding-001",
-            content = new
+            try
             {
-                parts = new[]
+                using var scope = _scopeFactory.CreateScope();
+                var scopedContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+                var resume = await scopedContext.Resumes.FirstOrDefaultAsync(r => r.Id == resumeId);
+                if (resume == null) return;
+
+                var apiKey = await scopedContext.ApiKeys.Select(k => k.Key).FirstOrDefaultAsync();
+                if (string.IsNullOrEmpty(apiKey))
                 {
-                    new { text = resume.Text }
+                    Console.WriteLine("No API key found");
+                    return;
                 }
+
+                var requestBody = new
+                {
+                    model = "gemini-embedding-001",
+                    content = new
+                    {
+                        parts = new[]
+                        {
+                        new { text = resume.Text }
+                    }
+                    }
+                };
+                var json = JsonSerializer.Serialize(requestBody);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                using var httpClient = _httpClientFactory.CreateClient();
+                var response = await httpClient.PostAsync(
+                    $"https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent?key={apiKey}",
+                    content
+                );
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"Gemini API error: {response.StatusCode}");
+                    var errorBody = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine("Error body: " + errorBody);
+                    return;
+                }
+
+                var responseBody = await response.Content.ReadAsStringAsync();
+                using var document = JsonDocument.Parse(responseBody);
+
+                var embeddingArray = document.RootElement
+                    .GetProperty("embedding")
+                    .GetProperty("values")
+                    .EnumerateArray()
+                    .Select(x => x.GetDouble())
+                    .ToArray();
+
+                resume.EmbeddingJson = JsonSerializer.Serialize(embeddingArray);
+                await scopedContext.SaveChangesAsync();
+
+                Console.WriteLine("Embeddings generated successfully!");
             }
-        };
-
-        var json = JsonSerializer.Serialize(requestBody);
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-        using var httpClient = _httpClientFactory.CreateClient();
-        var response = await httpClient.PostAsync(
-            $"https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent?key={apiKey}", 
-            content
-        );
-
-        if (!response.IsSuccessStatusCode)
-        {
-            Console.WriteLine($"Gemini API error: {response.StatusCode}");
-            var errorBody = await response.Content.ReadAsStringAsync();
-            Console.WriteLine("Error body: " + errorBody);
-            return;
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error generating embeddings: {e}");
+            }
         }
 
-        var responseBody = await response.Content.ReadAsStringAsync();
-        using var document = JsonDocument.Parse(responseBody);
+        [HttpGet("IsResumeRecordEmpty")]
+        public async Task<IActionResult> IsThereAnExistingResume()
+        {
+            var resume = await _context.Resumes.FirstOrDefaultAsync(r => r.Id == 1);
 
-        // Parse embeddings
-        var embeddingArray = document.RootElement
-            .GetProperty("embedding")
-            .GetProperty("values")
-            .EnumerateArray()
-            .Select(x => x.GetDouble())
-            .ToArray();
+            if (resume == null) return Ok(new { isSaved = false });
 
-        resume.EmbeddingJson = JsonSerializer.Serialize(embeddingArray);
-        await scopedContext.SaveChangesAsync();
-
-        Console.WriteLine("Embeddings generated successfully!");
-    }
-    catch (Exception e)
-    {
-        Console.WriteLine($"Error generating embeddings: {e}");
-    }
-}
+            return Ok(new { isSaved = true , id = resume.Id });
+        }
 
     }
 }

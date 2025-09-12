@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./App.css";
 import Tesseract from "tesseract.js";
 
@@ -9,6 +9,43 @@ const App = () => {
   const [resumeFileName, setResumeFileName] = useState("No file uploaded");
   const [apiKey, setApiKey] = useState("");
   const [isUploading, setIsUploading] = useState(false);
+  const [isApiKeySaved, setIsApiKeySaved] = useState(false);
+  const [isResumeSaved, setIsResumeSaved] = useState(false);
+
+  useEffect(() => {
+    const checkApiKey = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:5182/api/ApiKey/IsEmpty"
+        );
+        if (response.ok) {
+          const result = await response.json();
+          setIsApiKeySaved(result.isSaved);
+        }
+      } catch (error) {
+        console.error("Error checking API key:", error);
+      }
+    };
+
+    checkApiKey();
+  }, []);
+
+  useEffect(() => {
+    const checkResume = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:5182/api/Resume/IsResumeRecordEmpty"
+        );
+        if (response.ok) {
+          const result = await response.json();
+          setIsResumeSaved(result.isSaved);
+        }
+      } catch (error) {
+        console.error("Error checking Resume:", error);
+      }
+    };
+    checkResume();
+  }, []);
 
   // To handle screenshotted resumes
   const extractTextFromPDF = async (file) => {
@@ -162,7 +199,10 @@ const App = () => {
             <button className="button-base button-grey">Job matching</button>
           </div>
 
-          <p className="file-name">{resumeFileName}</p>
+          {/* <p className="file-name">{resumeFileName}</p> */}
+          <p className="resume-text">
+            {isResumeSaved ? "Resume uploaded ✅" : "No resume uploaded yet"}
+          </p>
 
           <label className="upload-label button-base button-purple">
             <input
@@ -175,7 +215,9 @@ const App = () => {
             {isUploading ? "Processing..." : "Upload your Resume"}
           </label>
 
-          <p className="api-key-text">Add your Gemini API key</p>
+          <p className="api-key-text">
+            {isApiKeySaved ? "API key added ✅" : "Add your Gemini API key"}
+          </p>
           <div className="api-key-input-container">
             <input
               type="password"

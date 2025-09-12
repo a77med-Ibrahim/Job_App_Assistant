@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using backend.Data;
 using backend.Models;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Controllers
 {
@@ -41,6 +42,14 @@ namespace backend.Controllers
             existingApiKey.Key = request.Key;
             await _context.SaveChangesAsync();
             return Ok(new { message = "API key updated successfully.", id = existingApiKey.Id });
+        }
+        [HttpGet("IsEmpty")]
+        public async Task<IActionResult> IsEmpty()
+        {
+            var apiKey = await _context.ApiKeys.FirstOrDefaultAsync(r => r.Id == 1);
+            if (apiKey == null) return Ok(new {isSaved = false});
+
+            return Ok(new { isSaved = true , id = apiKey.Id });
         }
         
     }
