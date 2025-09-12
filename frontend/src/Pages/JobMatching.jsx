@@ -2,28 +2,13 @@ import React, { useState, useRef, useEffect } from "react";
 import "./JobMatching.css";
 
 export default function App() {
-  const [apiKey, setApiKey] = useState("");
-  const [tempApiKey, setTempApiKey] = useState("");
-  const [resumeFile, setResumeFile] = useState(null);
   const [jobDescription, setJobDescription] = useState("");
   const [matchingScore, setMatchingScore] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const fileInputRef = useRef(null);
-
-  const handleFileChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      setResumeFile(file);
-    }
-  };
 
   const handleCalculateScore = () => {
     if (!jobDescription.trim()) {
       alert("Please paste a job description.");
-      return;
-    }
-    if (!resumeFile) {
-      alert("Please upload your resume first.");
       return;
     }
 
@@ -90,7 +75,6 @@ export default function App() {
     );
   };
 
-  // Loading spinner
   const LoadingSpinner = () => (
     <div className="spinner-wrapper">
       <div className="spinner-track"></div>
