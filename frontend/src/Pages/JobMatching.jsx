@@ -23,7 +23,7 @@ export default function App() {
 
   const ScoreCircle = ({ score }) => {
     const [displayScore, setDisplayScore] = useState(0);
-    const circumference = 2 * Math.PI * 55; // 55 is the radius
+    const circumference = 2 * Math.PI * 55; 
     const offset = circumference - (displayScore / 100) * circumference;
 
     useEffect(() => {
@@ -114,7 +114,7 @@ export default function App() {
               </div>
               <button
                 onClick={handleCalculateScore}
-                disabled={isLoading}
+                disabled={isLoading} 
                 className="button button-accent"
               >
                 {isLoading ? "Calculating..." : "Calculate Score"}

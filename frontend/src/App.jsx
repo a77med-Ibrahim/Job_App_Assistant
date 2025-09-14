@@ -35,7 +35,7 @@ const App = () => {
     const checkResume = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5182/api/Resume/IsResumeRecordEmpty"
+          "http://localhost:5182/Resume/Resume/IsResumeRecordEmpty"
         );
         if (response.ok) {
           const result = await response.json();
@@ -131,7 +131,7 @@ const App = () => {
         );
 
         const response = await fetch(
-          "http://localhost:5182/api/Resume/UpsertResume",
+          "http://localhost:5182/Resume/Resume//UpsertResume",
           {
             method: "POST",
             headers: {
