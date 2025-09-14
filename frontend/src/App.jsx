@@ -131,7 +131,7 @@ const App = () => {
         );
 
         const response = await fetch(
-          "http://localhost:5182/Resume/Resume//UpsertResume",
+          "http://localhost:5182/Resume/Resume/UpsertResume",
           {
             method: "POST",
             headers: {
