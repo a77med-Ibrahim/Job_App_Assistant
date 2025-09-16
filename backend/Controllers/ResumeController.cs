@@ -238,7 +238,7 @@ namespace backend.Controllers
                         }
                     }
                 }
-                Console.WriteLine("⚠️ No text found in Gemini response: " + responseBody);
+                Console.WriteLine(" No text found in Gemini response: " + responseBody);
                 return string.Empty;
 
 

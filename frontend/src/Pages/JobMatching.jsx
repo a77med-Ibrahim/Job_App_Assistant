@@ -6,7 +6,7 @@ export default function App() {
   const [matchingScore, setMatchingScore] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleCalculateScore = () => {
+  const handleCalculateScore = async () => {
     if (!jobDescription.trim()) {
       alert("Please paste a job description.");
       return;
@@ -14,16 +14,35 @@ export default function App() {
 
     setIsLoading(true);
     setMatchingScore(null);
-    setTimeout(() => {
-      const randomScore = Math.floor(Math.random() * (99 - 75 + 1)) + 75;
-      setMatchingScore(randomScore);
+
+    try {
+      const response = await fetch(
+        "http://localhost:5182/JobMatching/JobMatching/SaveJobDescription",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "text/plain",
+          },
+          body: jobDescription,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to calculate score");
+      }
+      const data = await response.json();
+      setMatchingScore(data.score);
+    } catch (error) {
+      console.error("Error:", error);
+      alert("There was a problem calculating the score.");
+    } finally {
       setIsLoading(false);
-    }, 2500);
+    }
   };
 
   const ScoreCircle = ({ score }) => {
     const [displayScore, setDisplayScore] = useState(0);
-    const circumference = 2 * Math.PI * 55; 
+    const circumference = 2 * Math.PI * 55;
     const offset = circumference - (displayScore / 100) * circumference;
 
     useEffect(() => {
@@ -114,7 +133,7 @@ export default function App() {
               </div>
               <button
                 onClick={handleCalculateScore}
-                disabled={isLoading} 
+                disabled={isLoading}
                 className="button button-accent"
               >
                 {isLoading ? "Calculating..." : "Calculate Score"}
