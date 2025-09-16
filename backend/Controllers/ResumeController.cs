@@ -173,22 +173,20 @@ namespace backend.Controllers
                 var apiKey = await _context.ApiKeys.Select(k => k.Key).FirstOrDefaultAsync();
                 if (string.IsNullOrEmpty(apiKey)) return string.Empty;
                 var prompt = $@"
-            You are a professional keyword extractor, you will be getting resumes, and your job is to extract important sentences or texts;
-            that you think it will be helpful and relevant.
-            For example:
-            If I am a computer engineer, I will be giving you a resume that has:
-            Mohammed Ahmed, Phone number...., Engineered and launched a ...., leading to 25% imporovment... (unrelevent)
-            2+ year of experince in full stack develpment, worked in company x from a-b, skills, education, address(relevant)
-            
-            Based on the input, I want you to extract a text which has all relevant stuff, 
+            You are a professional keyword and information extractor for resumes.
+            Your task is to read a candidate's resume and produce a **concise, structured summary in 3–4 sentences** containing only the most relevant details:
 
-            for example: 
-            2+ years of experince in full stack development, studied computer engineer, lives in Turkey, knowledge of: CI/CD, .NET, HTML,
-            Linux, RAG, etc..
+            - Work experience (roles, years)
+            - Skills used in projects or experience
+            - Education (Include only the degree and field)
+            - Location
 
-            Take the skills only from the place where he wrote about his experince, so if a user has a skills part in his resume, ignore it,
-            but if he has used these skills in projects/experince, consider it.
-            Resume: {resumeText}";
+            ⚡ Ignore: Contact info, hobbies, soft skills unrelated to technical work, standalone Skills sections, comapny names, university name, person name.
+
+            Example output:
+            '3+ years experience as Full-Stack Developer at Temo e.k (Frankfurt) and Marmara Centre (Istanbul), AI Engineer Intern at 180 Degree. Skilled in ASP.NET Core, React JS, Tailwind CSS, Entity Framework, CI/CD, Docker, LangChain, and RAG pipelines. Bachelor’s in Computer Engineering from Istanbul Bilgi University. Based in Frankfurt and Istanbul.'
+
+            Now extract a short summary from this resume:{ resumeText} ";
                 var requestBody = new
             {
                 contents = new[]
