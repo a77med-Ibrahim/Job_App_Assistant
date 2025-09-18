@@ -61,18 +61,26 @@ namespace backend.Controllers
         {
             try
             {
+                
                 var apiKey = await _context.ApiKeys.Select(k => k.Key).FirstOrDefaultAsync();
                 var shortResume = await _context.Resumes.Select(s => s.ShortResume).FirstOrDefaultAsync();
-
+                Console.WriteLine("ShortResume: " + shortResume);
+                Console.WriteLine("JobDescription: " + jobDescription);
                 if (string.IsNullOrEmpty(apiKey)) return 0;
 
                 var prompt = $@"
-                You are a professional resume grader. The candidate's resume contains only **keywords and key sentences**, not a full resume.
-                Read the description very carefully, and for each keyword that fully or partially match the short resume, I want you to give 5 points.
+                You are a professional resume grader.
 
-                Candidate Resume Keywords / Key Sentences: {shortResume}
-                Job Description: {jobDescription}";
+                The candidate's resume contains only keywords and key sentences.
 
+                Compare the resume with the job description.
+                Give **5 points** for each keyword match.
+                Return the final score **only as an integer between 0 and 100**.
+                Do not add any words, explanation, or formatting. Just the number.
+
+                Candidate Resume: {shortResume}
+                Job Description: {jobDescription}
+                ";
 
                 var requestBody = new
                 {
@@ -87,7 +95,7 @@ namespace backend.Controllers
                     },
                     generationConfig = new
                     {
-                        maxOutputTokens = 150
+                        maxOutputTokens = 500
                     }
                 };
 
