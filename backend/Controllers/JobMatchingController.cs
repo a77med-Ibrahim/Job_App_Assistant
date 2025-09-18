@@ -8,11 +8,15 @@ using Microsoft.EntityFrameworkCore;
 namespace backend.Controllers
 {
     [ApiController]
-    [Route("/JobMatching/[controller]")]
+    [Route("JobMatching/[controller]")]
     public class JobMatchingController : ControllerBase
     {
         private readonly AppDbContext _context;
         private readonly IHttpClientFactory _httpClientFactory;
+        public class JobDescriptionDto
+        {
+            public string JobDescription{ get; set; }
+        }
 
         public JobMatchingController(AppDbContext context, IHttpClientFactory httpClientFactory)
         {
@@ -28,8 +32,10 @@ namespace backend.Controllers
         }
 
         [HttpPost("SaveJobDescription")]
-        public async Task<IActionResult> SaveJobDescription([FromBody] string jobDescription)
+        [Consumes("text/plain","application/json")]
+        public async Task<IActionResult> SaveJobDescription([FromBody] JobDescriptionDto dto)
         {
+            var jobDescription = dto.JobDescription;
 
             var record = new Record
             {
@@ -48,7 +54,7 @@ namespace backend.Controllers
             _context.JobMatches.Add(JobMatch);
 
             await _context.SaveChangesAsync();
-            return Ok(new { Message = "Score generated successfully." , Score = JobMatch.Score});
+            return Ok(new { Message = "Score generated successfully.", Score = JobMatch.Score });
         }
 
         public async Task<int> GradingAsync(string jobDescription)
@@ -61,17 +67,12 @@ namespace backend.Controllers
                 if (string.IsNullOrEmpty(apiKey)) return 0;
 
                 var prompt = $@"
-                You are a professional resume grader. Your task is to compare a candidate's resume keywords and key sentences with a job description and give a **single numeric score out of 100** based on these criteria:
-
-                1. Location (20 points): Does the candidate’s location match or is close to the job location?
-                2. Tools / Technologies (40 points): How many of the tools, software, frameworks, or languages mentioned in the job description are found in the resume?
-                3. Years of Experience (30 points): How well does the candidate's experience duration match the job requirements?
-                4. Keywords / Key Sentences (10 points): How relevant are the candidate’s other key skills, roles, or sentences to the job description?
-
-                Return **only a single integer** (0–100) without any explanation or extra text.
+                You are a professional resume grader. The candidate's resume contains only **keywords and key sentences**, not a full resume.
+                Read the description very carefully, and for each keyword that fully or partially match the short resume, I want you to give 5 points.
 
                 Candidate Resume Keywords / Key Sentences: {shortResume}
                 Job Description: {jobDescription}";
+
 
                 var requestBody = new
                 {

@@ -11,7 +11,6 @@ export default function App() {
       alert("Please paste a job description.");
       return;
     }
-
     setIsLoading(true);
     setMatchingScore(null);
 
@@ -21,13 +20,15 @@ export default function App() {
         {
           method: "POST",
           headers: {
-            "Content-Type": "text/plain",
+            "Content-Type": "application/json",
           },
-          body: jobDescription,
+          body: JSON.stringify({ jobDescription }),
         }
       );
 
       if (!response.ok) {
+        const errorBody = await response.text();
+        console.error("Server said:", response.status, errorBody);
         throw new Error("Failed to calculate score");
       }
       const data = await response.json();
