@@ -3,6 +3,7 @@ import "./App.css";
 import Tesseract from "tesseract.js";
 import { Routes, Route, Link } from "react-router-dom";
 import JobMatching from "./Pages/JobMatching";
+import CoverLetter from "./Pages/CoverLetter";
 import { GlobalWorkerOptions, getDocument } from "pdfjs-dist";
 import pdfWorker from "pdfjs-dist/build/pdf.worker?url";
 
@@ -201,9 +202,13 @@ const App = () => {
                 <p className="subtitle">Your assistant to find a job</p>
 
                 <div className="button-container">
-                  <button className="button-base button-grey">
-                    Cover letter
-                  </button>
+                  <Link
+                    to="/CoverLetter"
+                    className="button-base button-grey"
+                    style={{ textDecoration: "none" }}
+                  >
+                    Cover Letter
+                  </Link>
                   <Link
                     to="/JobMatching"
                     className="button-base button-grey"
@@ -256,6 +261,7 @@ const App = () => {
         }
       />
       <Route path="/JobMatching" element={<JobMatching />} />
+      <Route path="/CoverLetter" element={<CoverLetter />} />
     </Routes>
   );
 };
