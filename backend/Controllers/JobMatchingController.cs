@@ -68,19 +68,27 @@ namespace backend.Controllers
                 Console.WriteLine("JobDescription: " + jobDescription);
                 if (string.IsNullOrEmpty(apiKey)) return 0;
 
+
                 var prompt = $@"
-                You are a professional resume grader.
+                Compare this resume with the job description and return a matching score from 0 to 100.
+                Return ONLY the number, no explanation.
 
-                The candidate's resume contains only keywords and key sentences.
-
-                Compare the resume with the job description.
-                Give **5 points** for each keyword match.
-                Return the final score **only as an integer between 0 and 100**.
-                Do not add any words, explanation, or formatting. Just the number.
-
-                Candidate Resume: {shortResume}
+                Resume: {shortResume}
                 Job Description: {jobDescription}
                 ";
+                // var prompt = $@"
+                // You are a professional resume grader.
+
+                // The candidate's resume contains only keywords and key sentences.
+
+                // Compare the resume with the job description.
+                // Give **5 points** for each keyword match.
+                // Return the final score **only as an integer between 0 and 100**.
+                // Do not add any words, explanation, or formatting. Just the number.
+
+                // Candidate Resume: {shortResume}
+                // Job Description: {jobDescription}
+                // ";
 
                 var requestBody = new
                 {
@@ -95,7 +103,9 @@ namespace backend.Controllers
                     },
                     generationConfig = new
                     {
-                        maxOutputTokens = 500
+                        maxOutputTokens = 3200,
+                        temperature = 0.7,        
+                        topP = 0.8  
                     }
                 };
 
@@ -116,8 +126,20 @@ namespace backend.Controllers
 
                 var responseBody = await response.Content.ReadAsStringAsync();
                 Console.WriteLine(" Gemini raw response: " + responseBody);
+                
+                
 
+                // Add this validation
+                if (string.IsNullOrEmpty(responseBody) || responseBody.Contains("error"))
+                {
+                    Console.WriteLine(" Invalid response from Gemini: " + responseBody);
+                    return 0;
+                }
+                
+                
                 using var document = JsonDocument.Parse(responseBody);
+                var fullJson = JsonSerializer.Serialize(document, new JsonSerializerOptions { WriteIndented = true });
+                Console.WriteLine("Parsed JSON structure: " + fullJson);
 
                 if (document.RootElement.TryGetProperty("candidates", out var candidates) &&
                     candidates.ValueKind == JsonValueKind.Array && candidates.GetArrayLength() > 0)
@@ -129,10 +151,17 @@ namespace backend.Controllers
                         parts.ValueKind == JsonValueKind.Array && parts.GetArrayLength() > 0)
                     {
                         var text = parts[0].GetProperty("text").GetString();
-
-                        if (int.TryParse(text, out int score))
+                        if (string.IsNullOrEmpty(text))
                         {
-                            return score;
+                            Console.WriteLine("No text content in Gemini response");
+                            return 0;
+                        }
+                        var cleanedText = System.Text.RegularExpressions.Regex.Match(text, @"\d+");
+
+
+                        if (cleanedText.Success && int.TryParse(cleanedText.Value, out int score))
+                        {
+                            return Math.Max(0, Math.Min(100, score)); // Ensure 0-100 range
                         }
                         else
                         {
