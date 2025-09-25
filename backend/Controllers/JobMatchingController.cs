@@ -125,17 +125,13 @@ namespace backend.Controllers
                 }
 
                 var responseBody = await response.Content.ReadAsStringAsync();
-                Console.WriteLine(" Gemini raw response: " + responseBody);
-                
-                
-
-                // Add this validation
+                Console.WriteLine(" Gemini raw response: " + responseBody);    
+            
                 if (string.IsNullOrEmpty(responseBody) || responseBody.Contains("error"))
                 {
                     Console.WriteLine(" Invalid response from Gemini: " + responseBody);
                     return 0;
-                }
-                
+                }    
                 
                 using var document = JsonDocument.Parse(responseBody);
                 var fullJson = JsonSerializer.Serialize(document, new JsonSerializerOptions { WriteIndented = true });
