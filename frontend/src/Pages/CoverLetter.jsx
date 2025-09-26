@@ -18,40 +18,55 @@ export default function App() {
       document.body.removeChild(script);
     };
   }, []);
+  const handleCopy = () => {
+    navigator.clipboard
+      .writeText(generatedCoverLetter)
+      .then(() => {
+        setCopyButtonText("Copied!");
+        setTimeout(() => setCopyButtonText("Copy"), 2000);
+      })
+      .catch((err) => {
+        console.error("Failed to copy text:", err);
+        alert("Copy failed. Please try again.");
+      });
+  };
 
-  const handleGenerateCoverLetter = () => {
+  const handleGenerateCoverLetter = async () => {
     if (!coverLetterJobDesc.trim()) {
       alert("Please paste a job description.");
       return;
     }
+
     setIsLoading(true);
     setGeneratedCoverLetter("");
-    setTimeout(() => {
-      const placeholderText = `Dear Hiring Manager,\n\nI am writing to express my keen interest in the position advertised. Based on the job description, I am confident that my skills and experience are a strong match for this role.\n\nMy background in [Your Field] has prepared me to excel in a position like this one. I am particularly adept at [Skill 1], [Skill 2], and [Skill 3]. ${
-        additionalDetails
-          ? `Furthermore, regarding the details I provided: ${additionalDetails}`
-          : ""
-      }\n\nI am excited about the opportunity to contribute to your team and am eager to discuss my application further. Thank you for your time and consideration.\n\nSincerely,\n[Your Name]`;
-      setGeneratedCoverLetter(placeholderText);
-      setIsLoading(false);
-    }, 2500);
-  };
-  const handleCopy = () => {
-    if (generatedCoverLetter) {
-      const textArea = document.createElement("textarea");
-      textArea.value = generatedCoverLetter;
-      textArea.style.position = "fixed";
-      textArea.style.left = "-9999px";
-      document.body.appendChild(textArea);
-      textArea.select();
-      try {
-        document.execCommand("copy");
-        setCopyButtonText("Copied!");
-        setTimeout(() => setCopyButtonText("Copy"), 2000);
-      } catch (err) {
-        console.error("Unable to copy", err);
+
+    try {
+      const response = await fetch(
+        "http://localhost:5000/CoverLetter/CoverLetter",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            JobDescription: coverLetterJobDesc,
+            additionalDetails: additionalDetails,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText);
       }
-      document.body.removeChild(textArea);
+
+      const data = await response.json();
+      setGeneratedCoverLetter(data.coverLetter);
+    } catch (err) {
+      console.error("Error generating cover letter:", err);
+      alert("Failed to generate cover letter. Check console for details.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
