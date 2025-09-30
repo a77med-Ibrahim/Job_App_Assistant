@@ -34,7 +34,7 @@ namespace backend.Controllers
             Resume targetResume;
             var existingResume = await _context.Resumes.Include(r => r.Record).FirstOrDefaultAsync();
 
-            if (existingResume != null) // If there is an existing record in the Resume table
+            if (existingResume != null) 
             {
                 existingResume.Text = resumeText;
                 existingResume.EmbeddingJson = string.Empty;

@@ -75,7 +75,7 @@ namespace backend.Controllers
                 - If he has experince with the same tools required by the job description
                 - Years of experince
                 - Lanugage asked by the job description and candidates skills in that language
-                Return ONLY the number, no explanation.
+                Return ONLY the number, no explination.
 
                 Resume: {shortResume}
                 Job Description: {jobDescription}
@@ -148,7 +148,7 @@ namespace backend.Controllers
 
                         if (cleanedText.Success && int.TryParse(cleanedText.Value, out int score))
                         {
-                            return Math.Max(0, Math.Min(100, score)); // Ensure 0-100 range
+                            return Math.Max(0, Math.Min(100, score)); 
                         }
                         else
                         {
