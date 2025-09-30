@@ -61,7 +61,6 @@ namespace backend.Controllers
         {
             try
             {
-                
                 var apiKey = await _context.ApiKeys.Select(k => k.Key).FirstOrDefaultAsync();
                 var shortResume = await _context.Resumes.Select(s => s.ShortResume).FirstOrDefaultAsync();
                 Console.WriteLine("ShortResume: " + shortResume);
@@ -71,24 +70,16 @@ namespace backend.Controllers
 
                 var prompt = $@"
                 Compare this resume with the job description and return a matching score from 0 to 100.
+                Criteria to compare:
+                - Job location vs the current applicant location, (if available)
+                - If he has experince with the same tools required by the job description
+                - Years of experince
+                - Lanugage asked by the job description and candidates skills in that language
                 Return ONLY the number, no explanation.
 
                 Resume: {shortResume}
                 Job Description: {jobDescription}
                 ";
-                // var prompt = $@"
-                // You are a professional resume grader.
-
-                // The candidate's resume contains only keywords and key sentences.
-
-                // Compare the resume with the job description.
-                // Give **5 points** for each keyword match.
-                // Return the final score **only as an integer between 0 and 100**.
-                // Do not add any words, explanation, or formatting. Just the number.
-
-                // Candidate Resume: {shortResume}
-                // Job Description: {jobDescription}
-                // ";
 
                 var requestBody = new
                 {
@@ -103,7 +94,7 @@ namespace backend.Controllers
                     },
                     generationConfig = new
                     {
-                        maxOutputTokens = 3200,
+                        maxOutputTokens = 3500,
                         temperature = 0.7,        
                         topP = 0.8  
                     }

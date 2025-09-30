@@ -179,7 +179,7 @@ namespace backend.Controllers
             - Work experience (roles, years)
             - Skills used in projects or experience
             - Education (Include only the degree and field)
-            - Location
+            - Location (Very important)
 
             ⚡ Ignore: Contact info, hobbies, soft skills unrelated to technical work, standalone Skills sections, comapny names, university name, person name.
 
