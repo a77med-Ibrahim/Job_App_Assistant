@@ -71,10 +71,11 @@ namespace backend.Controllers
                 var prompt = $@"
                 Compare this resume with the job description and return a matching score from 0 to 100.
                 Criteria to compare:
-                - Job location vs the current applicant location, (if available)
-                - If he has experince with the same tools required by the job description
-                - Years of experince
-                - Lanugage asked by the job description and candidates skills in that language
+                - Job location vs the current applicant location, (if available) (20 points) give 10 points if not mentioned either by the user or the job description,
+                - If he has experince with the same tools required by the job description (30 points),
+                - Years of experince (30 points),
+                - Lanugage asked by the job description and candidates skills in that language (20 points)
+                
                 Return ONLY the number, no explination.
 
                 Resume: {shortResume}
