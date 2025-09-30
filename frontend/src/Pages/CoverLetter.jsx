@@ -42,7 +42,7 @@ export default function App() {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/CoverLetter/CoverLetter",
+        "http://localhost:5182/api/CoverLetter/CoverLetter",
         {
           method: "POST",
           headers: {

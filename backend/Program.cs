@@ -8,10 +8,9 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: MyAllowSpecificOrigins,
                       policy =>
                       {
-                          // Allow requests from your React app's origin
                           policy.WithOrigins("http://localhost:5173")
-                                .AllowAnyHeader() // Allow all headers
-                                .AllowAnyMethod(); // Allow all HTTP methods (POST, GET, etc.)
+                                .AllowAnyHeader() 
+                                .AllowAnyMethod();
                       });
 });
 builder.Services.AddControllers();
@@ -21,7 +20,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
-app.UseCors(MyAllowSpecificOrigins);
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -32,7 +31,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
+app.UseCors(MyAllowSpecificOrigins);
 app.UseAuthorization();
 
 app.MapControllers();

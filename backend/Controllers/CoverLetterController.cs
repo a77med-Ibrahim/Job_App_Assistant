@@ -13,11 +13,16 @@ using Microsoft.EntityFrameworkCore;
 namespace backend.Controllers
 {
     [ApiController]
-    [Route("CoverLetter/[controller]")]
+    [Route("api/[controller]")]
     public class CoverLetterController : ControllerBase
     {
         private readonly AppDbContext _context;
         private readonly IHttpClientFactory _httpClientFactory;
+        public CoverLetterController(AppDbContext context, IHttpClientFactory httpClientFactory)
+        {
+            _context = context;
+            _httpClientFactory = httpClientFactory;
+        }
         public class CoverLetterRequestDto
         {
             public string JobDescription { get; set; }
@@ -68,6 +73,9 @@ namespace backend.Controllers
                 you are a professioanl cover letter writer, I want you using the above details to write a very strong
                 cover letter which is very eye catching, very human like, and using easy English wording to write a cover letter
                 that will make everyone accept the candidate.
+                Important:
+                Don't even add ** to bold a word
+                Always use Dear Sir/Madam, don't include [Date],your address, etc or any extra field
                 ";
 
                 var requestBody = new
