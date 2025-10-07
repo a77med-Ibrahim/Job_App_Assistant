@@ -174,7 +174,7 @@ namespace backend.Controllers
                 if (string.IsNullOrEmpty(apiKey)) return string.Empty;
                 var prompt = $@"
             You are a professional keyword and information extractor for resumes.
-            Your task is to read a candidate's resume and produce a **concise, structured summary in 3–4 sentences** containing only the most relevant details:
+            Your task is to read a candidate's resume and produce a **concise, structured summary in 3–5 sentences** containing only the most relevant details:
 
             - Work experience (roles, years)
             - Skills used in projects or experience
@@ -182,7 +182,7 @@ namespace backend.Controllers
             - Location (Very important)
 
             ⚡ Ignore: Contact info, hobbies, soft skills unrelated to technical work, standalone Skills sections, comapny names, university name, person name.
-
+            Your Output should be *A SUMMARY TEXT OF THE RESUME*
             Example output:
             '3+ years experience as Full-Stack Developer at Temo e.k (Frankfurt) and Marmara Centre (Istanbul), AI Engineer Intern at 180 Degree. Skilled in ASP.NET Core, React JS, Tailwind CSS, Entity Framework, CI/CD, Docker, LangChain, and RAG pipelines. Bachelor’s in Computer Engineering from Istanbul Bilgi University. Based in Frankfurt and Istanbul.'
 
