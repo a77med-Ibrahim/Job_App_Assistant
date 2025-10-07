@@ -1,46 +1,84 @@
 # Abssi – AI Job Application Assistant
 
-This is not the first project of its kind,  
-
-But it’s the most convenient, easy to use, requires no subscription, and no effort from you.  
-
-Abssi is your AI mate that checks your resume against the job description you are applying for, and tells you how well your resume matches the job.
-
-Not only that, it also writes a very detailed cover letter that covers all the main points you can use to apply for your dream job. There’s even a field where you can add any extra information you want to include in the cover letter that isn’t in your resume.
-
-*Whisper*: it doesn’t steal your information or give it to third parties. Cough, except for Google :)
-
-Check the following repository for more technical details, and to clone the project and use it locally:
-
-https://github.com/a77med-Ibrahim/Job_App_Assistant
+**Abssi** is a full-stack web project built to showcase the integration of AI agents in real-world applications.  
+It demonstrates how artificial intelligence can assist users in job applications by generating personalized cover letters and calculating job match scores efficiently and affordably.
 
 ---
 
-## Features
-- Resume analysis against job descriptions
-- Resume match scoring based on location, years of experience, certificates, and languages
-- AI-generated detailed cover letter
-- Optional field to add extra information not included in the resume
-- Runs fully locally, no subscription needed
+## 🧩 Tech Stack
+
+- **ASP.NET Core** – Backend API  
+- **Entity Framework Core** – Database / ORM  
+- **ReactJS** – Frontend Framework  
+- **SQLite** – Lightweight local database  
+- **Gemini 2.5 Flash API** – AI agent for resume analysis and cover letter generation  
 
 ---
 
-## Tech Stack
-- **ASP.NET Core** – Backend API
-- **Entity Framework Core** – Database / ORM
-- **ReactJS** – Frontend
-- **SQLite** – Lightweight local database
-- **Gemini 2.5 Flash API** – AI agent for resume analysis and cover letter generation
+## ⚙️ Supported AI Model
 
-### About Gemini 2.5 Flash API
-- Used because it is fast, accurate, and anyone can get a free API key from [AI Studio](https://aistudio.google.com/)
-- The AI was given a precise prompt to effectively perform the tasks required
-- To reduce token usage, when a user uploads their resume, Abssi extracts only the important keywords (e.g., location, years of experience, certificates, skills) to create a condensed version
-- This condensed resume is then compared with the job description, saving thousands of tokens instead of processing the full resume each time
+### Gemini 2.5 Flash Only
+
+This project currently supports **Gemini 2.5 Flash** exclusively.
+
+#### Why Gemini 2.5 Flash?
+
+- It’s **fast**, **cost-efficient**, and **token-light**.  
+- Job seekers often apply to many positions, so minimizing token usage helps reduce cost and improve response time.
+
+#### Why Gemini instead of OpenAI or others?
+
+Because **Gemini’s API keys are free** for anyone through [Google AI Studio](https://aistudio.google.com/), making this project accessible to all developers and users.
 
 ---
 
-## Setup / Installation
+## 💡 Features
+
+The website provides two main tools:
+
+### 1. Cover Letter Writer
+Users upload their **resume** and **job description**.  
+They can also add extra personal information not present in the resume.  
+The AI then generates a **personalized cover letter** for that specific job.
+
+### 2. Job Match Score
+Users provide their **resume** and **job description**, and the AI calculates a **match percentage** based on:
+- Job and user **location**
+- **Languages spoken**
+- **University degree**
+- **Years of experience**
+- **Field of experince**
+
+This helps users quickly identify which jobs are the best fit.
+
+---
+
+## 🧠 Engineering Behind the Idea
+
+Applying to many jobs using full resumes (often 1.5–2 pages long) is inefficient — it consumes **thousands of tokens** per request.  
+To solve this, Abssi introduces a **shortResume** optimization technique.
+
+### How It Works
+1. The AI processes the user’s full resume once and extracts key details:
+   - Location  
+   - Languages spoken  
+   - Years of experience  
+   - University and education  
+   - Field of experince 
+
+2. These details are stored in the database as a text summary field called **`shortResume`**, which is only **3–5 sentences long**.
+
+3. For subsequent actions (like job match or cover letter generation), the system uses **shortResume** instead of the full resume.
+
+### Benefits
+- Reduces input token usage from **1,500–2,000 tokens** → **100–130 tokens** per request.  
+- Saves significant API costs.  
+- Speeds up response time.  
+- Maintains accuracy and relevance in AI results.
+
+---
+
+## 🚀 Setup / Installation
 
 ### Backend
 ```bash
@@ -56,12 +94,8 @@ npm install
 npm start
 ```
 
+## ⚠️ Important Note
 
-### Important Note
+While this AI-powered tool helps generate ideas and drafts, it’s always best to write your own authentic cover letter that reflects your personality and values.
 
-Always keep in mind that writing your own authentic cover letter is better than taking one from AI.
-
-This project was made for fun and learning purposes only.
-
-
-
+This project was built for learning, experimentation, and demonstration purposes.
