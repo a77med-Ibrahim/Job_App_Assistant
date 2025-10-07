@@ -58,19 +58,19 @@ This helps users quickly identify which jobs are the best fit.
 
 ### 1. Main Page  
 Users can enter their **API key** and upload their **resume** to start using the assistant.  
-![Main Page Screenshot](./screenshots/main-page.png)
+![Main Page Screenshot](/AbbsiMainPage.png)
 
 ---
 
 ### 2. Cover Letter Generator  
 Includes fields for the **job description**, **extra information**, and a section where the **AI-generated cover letter** appears.  
-![Cover Letter Page Screenshot](./screenshots/cover-letter-page.png)
+![Cover Letter Page Screenshot](/CoverLetterPage.png)
 
 ---
 
 ### 3. Job Match Scoring  
 Users enter a **job description**, and the AI provides a **match score** based on resume data, experience, location, and skills.  
-![Job Match Page Screenshot](./screenshots/job-match-page.png)
+![Job Match Page Screenshot](/JobMatchingPage.png)
 
 ---
 
