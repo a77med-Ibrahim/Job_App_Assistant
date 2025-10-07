@@ -53,6 +53,26 @@ This helps users quickly identify which jobs are the best fit.
 
 ---
 
+## 🖼️ Screenshots
+
+### 1. Main Page  
+Users can enter their **API key** and upload their **resume** to start using the assistant.  
+![Main Page Screenshot](./screenshots/main-page.png)
+
+---
+
+### 2. Cover Letter Generator  
+Includes fields for the **job description**, **extra information**, and a section where the **AI-generated cover letter** appears.  
+![Cover Letter Page Screenshot](./screenshots/cover-letter-page.png)
+
+---
+
+### 3. Job Match Scoring  
+Users enter a **job description**, and the AI provides a **match score** based on resume data, experience, location, and skills.  
+![Job Match Page Screenshot](./screenshots/job-match-page.png)
+
+---
+
 ## 🧠 Engineering Behind the Idea
 
 Applying to many jobs using full resumes (often 1.5–2 pages long) is inefficient — it consumes **thousands of tokens** per request.  
