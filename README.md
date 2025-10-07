@@ -48,6 +48,7 @@ Users provide their **resume** and **job description**, and the AI calculates a 
 - **University degree**
 - **Years of experience**
 - **Field of experince**
+- **Skills and tools**
 
 This helps users quickly identify which jobs are the best fit.
 
